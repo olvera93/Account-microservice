@@ -1,5 +1,6 @@
 package com.olvera.accounts.service.impl;
 
+import com.olvera.accounts.dto.AccountsDto;
 import com.olvera.accounts.dto.CustomerDto;
 import com.olvera.accounts.entity.Accounts;
 import com.olvera.accounts.entity.Customer;
@@ -17,6 +18,7 @@ import java.util.Random;
 
 import static com.olvera.accounts.constants.AccountsConstants.ADDRESS;
 import static com.olvera.accounts.constants.AccountsConstants.SAVINGS;
+import static com.olvera.accounts.mapper.AccountsMapper.mapToAccounts;
 import static com.olvera.accounts.mapper.AccountsMapper.mapToAccountsDto;
 import static com.olvera.accounts.mapper.CustomerMapper.mapToCustomer;
 import static com.olvera.accounts.mapper.CustomerMapper.mapToCustomerDto;
@@ -34,7 +36,7 @@ public class AccountsServiceImpl implements IAccountsService {
     @Override
     public void createAccount(CustomerDto customerDto) {
 
-        Customer customer = mapToCustomer(customerDto);
+        Customer customer = mapToCustomer(customerDto, new Customer());
 
         Optional<Customer> optionalCustomer = customerRepository.findByMobileNumber(customerDto.getMobileNumber());
 
@@ -68,11 +70,37 @@ public class AccountsServiceImpl implements IAccountsService {
                 () -> new ResourceNotFoundException("Account", "customerId", customer.getCustomerId().toString())
         );
 
-        CustomerDto customerDto = mapToCustomerDto(customer);
-
-        customerDto.setAccountsDto(mapToAccountsDto(accounts));
-
+        CustomerDto customerDto = mapToCustomerDto(customer, new CustomerDto());
+        customerDto.setAccountsDto(mapToAccountsDto(accounts, new AccountsDto()));
         return customerDto;
+    }
+
+    /**
+     * Update account details for a customer
+     *
+     * @param customerDto - CustomerDto Object
+     * @return boolean indicating if the update of Account details is successful or not
+     */
+    @Override
+    public boolean updateAccount(CustomerDto customerDto) {
+        boolean isUpdated = false;
+        AccountsDto accountsDto = customerDto.getAccountsDto();
+        if(accountsDto !=null ){
+            Accounts accounts = accountsRepository.findById(accountsDto.getAccountNumber()).orElseThrow(
+                    () -> new ResourceNotFoundException("Account", "AccountNumber", accountsDto.getAccountNumber().toString())
+            );
+            mapToAccounts(accountsDto, accounts);
+            accounts = accountsRepository.save(accounts);
+
+            Long customerId = accounts.getCustomerId();
+            Customer customer = customerRepository.findById(customerId).orElseThrow(
+                    () -> new ResourceNotFoundException("Customer", "CustomerID", customerId.toString())
+            );
+            mapToCustomer(customerDto, customer);
+            customerRepository.save(customer);
+            isUpdated = true;
+        }
+        return  isUpdated;
     }
 
     /**
