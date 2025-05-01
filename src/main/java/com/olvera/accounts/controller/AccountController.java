@@ -19,7 +19,6 @@ public class AccountController {
 
     private IAccountsService accountsService;
 
-
     @PostMapping("/create")
     public ResponseEntity<ResponseDto> createAccount(@RequestBody CustomerDto customerDto) {
 
@@ -28,6 +27,16 @@ public class AccountController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(STATUS_201, MESSAGE_201));
+    }
+
+    @GetMapping("/fetch")
+    public ResponseEntity<CustomerDto> fetchAccountDetails(@RequestParam String mobileNumber) {
+
+        CustomerDto customerDto = accountsService.fetchAccount(mobileNumber);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(customerDto);
     }
 
 }
