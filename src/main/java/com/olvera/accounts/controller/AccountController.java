@@ -3,6 +3,8 @@ package com.olvera.accounts.controller;
 import com.olvera.accounts.dto.CustomerDto;
 import com.olvera.accounts.dto.ResponseDto;
 import com.olvera.accounts.service.IAccountsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.olvera.accounts.constants.AccountsConstants.*;
 
+@Tag(
+        name = "CRUD REST APIs for Accounts in EazyBank",
+        description = "CRUD REST APIs in EazyBank to CREATE, UPDATE, FETCH, AND DELETE account details"
+)
 @RestController
 @RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 @AllArgsConstructor
@@ -22,6 +28,10 @@ public class AccountController {
 
     private IAccountsService accountsService;
 
+    @Operation(
+            summary = "Create Account REST API",
+            description = "REST API to create a new Customer & Account inside EazyBank"
+    )
     @PostMapping("/create")
     public ResponseEntity<ResponseDto> createAccount(@Valid @RequestBody CustomerDto customerDto) {
 
